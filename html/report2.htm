@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Report</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style>
+	.footer{background-color:#DDD;padding:6px;}
+	.footer a{display: inline-block;width:25%;font-size:150%;text-decoration:none;color:#A84;background-color:#CCC;text-align:center;padding:4px;}
+	.alarm {background-color:#EEE;padding:6px;transition-duration: 1s;text-align:center;}
+	.alarm a{display: inline-block;width:20%;font-size:120%;text-decoration:none;color:#FFF;background-color:#E44;text-align:center;padding:4px;}
+	input{width:60px;text-align:center;}
+    </style>
+<script>
+window.onload=init;
+xmlhttp=new XMLHttpRequest();
+xmlhttp.onreadystatechange= function()
+	{
+		if(xmlhttp.readyState==4 && xmlhttp.status==200 )
+			if(xmlhttp.responseText!='')
+				{showReport(xmlhttp.responseText);};
+	};
+rI=0;
+function init()
+{
+	refreshTime(5);
+}
+function refreshTime(t)
+{
+	clearInterval(rI);
+	rI=setInterval(getReport,t*1000);
+}
+var data,thresholds =[];
+var reqTime;
+function getReport()
+{	
+	xmlhttp.open("GET","*r",true);
+	xmlhttp.send();
+	reqTime=Date.now();
+}
+function showReport(resp)
+{
+	data= JSON.parse(resp);
+	data['rTime']=Date.now()-reqTime;
+	for(key in data)
+	{
+		thresholds[key]=document.getElementById(key+"TH").value;
+		document.getElementById(key).innerHTML = data[key];
+	}
+	inspectData();
+}
+function inspectData()
+{
+showAlarm=false;
+if(data.MQ4 > thresholds.MQ4)
+	showAlarm=true;
+if(data.MQ214 > thresholds.MQ214)
+	showAlarm=true;
+if(data.temperature > thresholds.temperature)
+	showAlarm=true;
+if(data.upTime > thresholds.upTime)
+	showAlarm=true;
+if(data.rTime > thresholds.rTime)
+	showAlarm=true;
+if(data.battery > thresholds.battery)
+	showAlarm=true;
+if(showAlaram)
+		alarm(true);
+}
+var audio = new Audio('beep.wav');
+var alarmInt;
+var alarmBack;
+function alarm(play)
+{
+alarmBack=document.getElementById("alarm");
+if (play)
+	alarmInt=setInterval(function(){audio.play();
+	if (alarmBack.style.backgroundColor=="rgb(255, 0, 0)")alarmBack.style.backgroundColor="rgb(255, 255, 255)"; 
+	else alarmBack.style.backgroundColor="#FF0000";},1500);
+else
+	{clearInterval(alarmInt);alarmBack.style.backgroundColor="#EEE";}
+} 	
+</script>
+    </head>
+    <body>
+	<h2 style="text-align:left">Report and the Robot's status</h2>
+	<div style="text-align:center;">
+	Refresh data in <input type="number" onchange="refreshTime(this.value);" value="5"> seconds.<br>
+	<table border="1" style="margin:4px auto;background-color:#EEE;text-align:center;">
+	<tr>
+		<td></td><td>MQ214 Sensor</td><td>MQ4 Sensor</td><td>Battery Voltage<br>(volts)</td><td>Temperature<br>(Celsius)</td><td>ResponseTime<br>(milliseconds)</td><td>Up Time<br>(minutes)</td>
+	</tr>
+	<tr>
+		<td>Value:</td><td><span id="MQ214">1111</span></td><td><span id="MQ4">2222</span></td><td><span id="battery">3333</span></td><td><span id="temperature">4444</span></td><td><span id="rTime">555</span></td><td><span id="upTime">666</span></td>
+	</tr>
+	<tr>
+		<td>Alarm at:(*)</td><td><input id="MQ214TH" type="number"value="40"></td><td><input id="MQ4TH" type="number"value="55"></td>
+		<td><input id="batteryTH" type="number"value="4.9"></td><td><input id="temperatureTH" type="number"value="1"></td>
+		<td><input id="rTimeTH" type="number"value="3"></td><td><input id="upTimeTH" type="number"value="4320"></td>
+	</tr>
+	</table>
+	<p style="text-align:left">* - If you are using a mobile device like a tablet or smart phone <a href="#" onclick="alarm(true);">play the alarm</a> at least once.</p>
+	<br><br>
+	<div id="alarm" class="alarm">
+	Alarm: 
+        <a href="#" onclick="alarm(true);">Play</a>
+        <a href="#" onclick="alarm(false);">Stop</a>
+	</div>
+	<div  style="text-align:center;" class="footer">
+        <a href="control.htm">Control</a>
+        <a href="/paths/">Routes</a>
+		<a href="report.htm">Report</a>
+	</div>
+	</div>
+    </body>
+</html>

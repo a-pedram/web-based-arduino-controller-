@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Controller</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style>
+        *{margin:0px;padding:0px;}
+        body{font-size: 150%}
+        .dir{background-color: #FF8;width:100%;text-align: center;border-radius: 25%;font-size: 150%;
+		-webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;}
+        #dirA{width:50%;height:100%;background-color:#BBB;display:inline-block;}
+        #options,#file{float:left;padding: 4px;width:20%}
+        td{width:30%;line-height: 250%;padding: 5px;text-align:center;}
+        input{font-size:120%; width:20%}
+        button{}
+		a{display: inline-block;width:25%;font-size:150%;text-decoration:none;color:#A84;background-color:#CCC;padding:4px;}
+    </style>
+<script>    
+    xmlhttp=new XMLHttpRequest();
+    function init(){
+        dirB = document.getElementsByClassName("dir");
+        for(i=0;i<dirB.length;i++)
+            {
+                dirB[i].addEventListener('touchstart',press,true);
+                dirB[i].addEventListener('mousedown',press,true);
+                dirB[i].addEventListener('touchend',unpress,true);
+                dirB[i].addEventListener('mouseup',unpress,true);
+            }            
+    }
+    xmlhttp.onreadystatechange= function()
+        {
+            if(xmlhttp.readyState==4 && xmlhttp.status==200 )
+                if(xmlhttp.responseText!='')
+                    {};
+        };
+    function press(){
+		command = "*+"+this.id;
+		if (this.id=="s") command += document.getElementById('delay').value;
+        xmlhttp.open("GET",command,true);               
+        xmlhttp.send();
+    }
+    function unpress(){
+        xmlhttp.open("GET","*-"+this.id,true);               
+        xmlhttp.send();
+    }
+	function speed(){
+	xmlhttp.open("GET","*P"+document.getElementById('speed').value);               
+    xmlhttp.send();
+	}
+    function savePath()
+    {
+        nt=document.getElementById("name");
+        name=nt.value;
+        if (name.trim()=='')
+            {
+                alert("You must first choose a name!");
+                return;
+            }
+        nt.setAttribute("disabled","disabled");
+        xmlhttp.open("GET","*F"+name,false);               
+        xmlhttp.send();
+        if (xmlhttp.responseText=='1')
+            {
+                alert('You can start now!');
+                init();
+            }
+        else
+            {alert("There is something wrong! consider resetting the robot.");}    
+    }
+    function stop()
+    {
+        
+    }
+</script>
+    </head>
+    <body>
+		<div  style="text-align:center;margin:5px auto;">
+			Name:<input id="name"  type="text">
+				<input type="button" value="Start" onclick="savePath();"> 
+				<input type="button" value="Stop" onclick="stop();"><br>
+			<div id="dirA">
+				<table style="width:100%">
+					<tr><td><input id="delay" type="number"></td><td><div class="dir" id="s" style="background-color:#F00;color:#FFF">S</div></td><td><div class="dir" id="a" style="background-color:#F0F;color:#FFF">A</div></td></tr>
+					<tr><td><div class="dir" id="p" style="background-color:#0b0;color:#FFF">&#8630;</div></td><td>MP&amp;MP</td><td><div class="dir" id="P" style="background-color:#0B0;color:#FFF">&#8631;</div></td></tr>
+					<tr><td><div class="dir" id="z">&#8624;</div></td><td><div class="dir" id="f">&uparrow;</div></td><td><div class="dir" id="x">&#8625;</div></td></tr>
+					<tr><td><div class="dir" id="l">&leftarrow;</div></td><td><div class="dir" id="b">&downarrow;</div></td><td><div class="dir" id="r">&rightarrow;</div></td></tr>				
+				</table>
+			</div>
+			<!--<div id="options">            
+				Motion Speed:<br><input id="mspeed" type="number" value="1200"><br>
+				Rotation Speed:<br><input id="rspeed" type="number"><br>
+				<input type="button" onclick="speed();" value="Change speed">
+			</div>-->			
+		</div>
+        <br style="clear:both">
+        <br>
+	<div  style="text-align:center;">
+        <a href="control.htm">Control</a>
+        <a href="/paths/">Routes</a>
+		<a href="report.htm">Report</a>
+	</div>
+    </body>
+</html>
